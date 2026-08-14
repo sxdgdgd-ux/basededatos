@@ -1,1 +1,2 @@
-holaaaaaa
+Base de datos Relacionales son muy estructuradas y la mas usadas comparadas a las no relacionaes  
+Oracle, MySQL, SQLServer, PostgreSQL, SQLite
