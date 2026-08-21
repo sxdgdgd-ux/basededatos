@@ -26,3 +26,98 @@ El comando USE se utiliza para seleccionar la base de datos
 El comando DROP DATABASE sirve para eliminar una base de datos. 
 
 Ejemplo: DROP DATABASE (database);
+
+
+-- Tipode datos en sql
+En SQL, los tipos de datos se clasifican en varias categorías, según el tipo de valor que almacenan.
+
+TIPO            TAMAÑO      Descripción
+TYNYINT         1 BYTE      Entero muy pequeño (-128 a 127)
+SMALLINT        2 BYTE      Entero pequeño
+MEDIUMUNT       3 BYTE      Entero mediano
+INT O INTEGER   4 BYTE      Entero estándar
+BIGINT          8 BYTE      Entero muy grande
+
+Sentencias SQL para definición de datis (DDL): CREATE, ALTER,DROP
+
+-- CREATE 
+
+El comando CREATE se uliliza para construir nuevos objetos dentro de la base de datos
+
+Ejemplo:
+CREATE TABLE nombre_tabla
+    (
+        nombre_columna1 tipo_de_dato [restricciones],
+        nombre_columna2 tipo_de_dato [restricciones],
+        nombre_columna3 tipo_de_dato [restricciones],
+    )
+
+EJEMPLO PRATICOS:
+CREACION DE UNA TABLA DE "PERSONAL"
+
+CREATE TABLE t_personal
+(
+
+    id INT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    ciudad VARCHAR(100),
+    salario INT,
+    departamento VARCHAR(50),
+    fecharegistro DATE
+);
+
+
+-- UNIQUE:No puede haber filas con valores duplicados 
+
+/*
+La principal diferencia entre una clave primaria (PRIMARY KEY) y una clave única
+(UNIQUE) en SQL, al definir una tabla con CREATE TABLE, es que PRIMARY KEY no 
+permite valores nulos, mientras que UNIQUE sí puede permitir un valor nulo. Además, una tabla
+solo puede tener una PRIMARY KEY, pero puede tener múltiples UNIQUE.
+*/
+
+-- Creacioón de una tabla "productos" con valor por defecto.
+
+CREATE TABLE t_productos
+(
+    id INT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
+    stock INT DEFAULT 0,
+    fechacreacion DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+/* La columna stock tendrá un valor por defecto de 0 si no se especifica uno
+al insertar un nuevo producto, y fechacreacion registrará
+la fecha y la hora actual de la inserción
+*/
+
+
+-- El comando ALTER
+/*
+Una vez que se crea una estructura, rara vez permanece estática. El comando ALTER permite
+modificar la estructura de un objeto de base de datos existente sin tener que recrearlo desde cero.
+*/
+
+/*Añadir una nueva columna */
+ALTER TABLE nombre_tabla
+    ADD nombre_columna tipo_de_dato [restricciones];
+
+/*Modificar una clumna existente */
+ALTER TABLE nombre_tabla
+    ALTER COLUMN nombre_columna nuevo_tipo_de_dato [restricciones];
+
+/*Eliminar una columna */
+ALTER TABLE nombre_tabla
+    DROP COLUMN nombre_columna;
+
+Ejemplo:
+Añadir la columna "telefono" ala tabla "t_personal"
+    ALTER TABLE t_personal
+        ADD telefono VARCHAR(20);
+
+Eliminar la columna "fecharegistro" de la tabla "t_personal"
+    ALTER TABLE t_personal
+        DROP COLUMN fecharegistro;
