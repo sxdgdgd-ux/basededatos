@@ -74,3 +74,4 @@ DESC empresa.t_personal;
 Nota : La sentencia DESCRIBE (o DESC) no está disponible en todas los DBMS, es un comando específico del dialecto de mySQL
 y MariaDB, no un estándar universal.
 */
+
