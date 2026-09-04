@@ -1,0 +1,9 @@
+Ejemplos de consultas 
+/*
+Consultas a Base de datos
+Para obtener una lista de todas las bases de datos en el servidor, se puedes ulitizar la siguiente
+cosulta.
+*/
+
+SELECT schema_name
+FROM information_schema.schemata;
