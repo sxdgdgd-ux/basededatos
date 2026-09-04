@@ -52,3 +52,12 @@ FROM information_schema.columns
 
 WHERE table_schema = 'mi_base_de_datos' AND 
 table_name = 'mi_tabla';
+
+-- Por ejemplo...
+SELECT column_name,
+data_type,
+is_nullable,
+column_default
+FROM information_schema.columns
+WHERE table_schema ='empresa' AND
+table_name ='t_personal';
