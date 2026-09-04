@@ -64,3 +64,17 @@ column_default
 FROM information_schema.columns
 WHERE table_schema ='empresa' AND
 table_name ='t_personal';
+
+
+-- DESCRIBE o DESC : Una vista similar de la estructura de una tabla.
+DESCRIBE mi_base_de_datos.mi_tabla;
+
+-- Por ejemplo...
+DESCRIBE empresa.t_personal;
+-- O
+DESC empresa.t_personal;
+
+/*
+Nota : La sentencia DESCRIBE (o DESC) no está disponible en todas los DBMS, es un comando específico del dialecto de mySQL
+y MariaDB, no un estándar universal.
+*/
