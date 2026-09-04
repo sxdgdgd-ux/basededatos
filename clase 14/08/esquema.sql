@@ -7,3 +7,32 @@ cosulta.
 
 SELECT schema_name
 FROM information_schema.schemata;
+
+-- Comando SHOW
+/*
+Una consulta similar a la anterior es utilizado el comando "SHOW".
+Nota: La Sentencia SHOW no está disponible en todos los DBMS, es un comando específico del dialecto de mySQL
+*/
+
+SHOW DATABASES;
+
+-- Consultas a Tablas
+/*
+Para listar todas las tablas dentro de la base de datos "mi_base_de_datos".
+*/
+
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = "mi_base_de_datos";
+
+/*Como por ejemplo, para una base de datos llamada "empresa" sería así...*/
+
+SELECT table_name
+FROM information_schema.tables
+WHERE table schema = "empresa";
+
+
+-- El comando "SHOW" también ofrece una alternativa
+
+USE empresa;
+SHOW TABLES;

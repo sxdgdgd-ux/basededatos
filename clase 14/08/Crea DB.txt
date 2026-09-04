@@ -32,3 +32,9 @@ WHERE table_schema = "mi_base_de_datos";
 SELECT table_name
 FROM information_schema.tables
 WHERE table schema = "empresa";
+
+
+-- El comando "SHOW" también ofrece una alternativa
+
+USE empresa;
+SHOW TABLES;
