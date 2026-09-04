@@ -36,3 +36,19 @@ WHERE table schema = "empresa";
 
 USE empresa;
 SHOW TABLES;
+
+-- Consultas a Columnas 
+/*
+Para obtener información detallada sobre las columnas de una tabla en particular, incluyendo su tipo de dato, si admiten nulos
+y sus valores por defecto, utilice una consulta similar a la siguiente.
+*/
+
+SELECT column_name,
+data_type,
+is_nullable,
+column_default
+
+FROM information_schema.columns 
+
+WHERE table_schema = 'mi_base_de_datos' AND 
+table_name = 'mi_tabla';
