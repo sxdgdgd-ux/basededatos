@@ -1,0 +1,183 @@
+-- =============================================================================
+-- BASE DE DATOS ESTRUCTURADAS - SCRIPT DE CONSULTAS Y COMANDOS SQL
+-- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 1. GESTIÓN DE BASES DE DATOS (DDL)
+-- -----------------------------------------------------------------------------
+
+-- Crear una nueva base de datos
+CREATE DATABASE empresa;
+
+-- Seleccionar la base de datos de trabajo
+USE empresa;
+
+-- Eliminar una base de datos (Operación irreversible)
+DROP DATABASE empresa;
+
+
+-- -----------------------------------------------------------------------------
+-- 2. DEFINICIÓN DE ESTRUCTURAS DE TABLAS (DDL)
+-- -----------------------------------------------------------------------------
+
+-- Eliminar tablas si existen antes de crearlas
+DROP TABLE IF EXISTS t_personal;
+DROP TABLE IF EXISTS t_producto;
+
+-- Crear tabla 't_personal' con restricciones (PRIMARY KEY, NOT NULL, UNIQUE)
+CREATE TABLE t_personal (
+    id INT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    ciudad VARCHAR(100),
+    salario INT,
+    departamento VARCHAR(50),
+    fecharegistro DATE
+);
+
+-- Crear tabla 't_producto' con valores por defecto (DEFAULT)
+CREATE TABLE t_producto (
+    id INT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
+    stock INT DEFAULT 0,
+    fechacreacion DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- -----------------------------------------------------------------------------
+-- 3. MODIFICACIÓN DE TABLAS (ALTER TABLE)
+-- -----------------------------------------------------------------------------
+
+-- Añadir una nueva columna
+ALTER TABLE t_personal 
+ADD telefono VARCHAR(20);
+
+-- Eliminar una columna
+ALTER TABLE t_personal 
+DROP COLUMN fecharegistro;
+
+-- Eliminar una tabla completa y su estructura
+DROP TABLE t_producto;
+
+
+-- -----------------------------------------------------------------------------
+-- 4. MANIPULACIÓN DE DATOS (DML)
+-- -----------------------------------------------------------------------------
+
+-- Re-crear tabla t_producto para ejemplos de manipulación de datos
+CREATE TABLE IF NOT EXISTS t_producto (
+    id INT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
+    stock INT DEFAULT 0,
+    fechacreacion DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- INSERT: Insertar un registro especificando columnas
+INSERT INTO t_personal (id, nombre, apellido, salario, departamento)
+VALUES (1, 'Juan', 'Pérez', 700000, 'Ventas');
+
+-- INSERT: Insertar múltiples registros especificando columnas
+INSERT INTO t_personal (id, nombre, apellido, salario, departamento)
+VALUES 
+    (2, 'María', 'García', 650000, 'Marketing'),
+    (3, 'Carlos', 'López', 680000, 'IT'),
+    (4, 'Ana', 'Martín', 620000, 'Ventas');
+
+-- INSERT: Insertar registros sin especificar columnas (debe incluir todos los valores)
+INSERT INTO t_personal 
+VALUES (5, 'Ana', 'Santos', 'as@gmail.com', 'Temuco', 900000, 'Gerencia', '2025-08-21');
+
+INSERT INTO t_producto 
+VALUES 
+    (1, 'Cuaderno', 4500, 20, '2025-08-21'),
+    (2, 'Lápiz', 2800, 35, '2024-09-11'),
+    (3, 'Goma', 1200, 15, '2023-10-31');
+
+-- UPDATE: Actualizar un registro específico
+UPDATE t_personal
+SET salario = 750000
+WHERE id = 1;
+
+-- UPDATE: Actualizar múltiples columnas con múltiples condiciones
+UPDATE t_personal
+SET salario = salario * 1.10,
+    departamento = 'Ventas Senior'
+WHERE departamento = 'Ventas' AND salario > 700000;
+
+-- UPDATE: Actualizar todos los registros de una tabla
+UPDATE t_producto
+SET precio = precio * 1.05;
+
+-- DELETE: Eliminar un registro específico
+DELETE FROM t_personal
+WHERE id = 3;
+
+-- DELETE: Eliminar registros según condiciones
+DELETE FROM t_personal
+WHERE salario > 600000 AND departamento = 'Marketing';
+
+-- DELETE: Eliminar todos los registros de una tabla
+DELETE FROM t_personal;
+
+
+-- -----------------------------------------------------------------------------
+-- 5. CONSULTAS DE DATOS (SELECT, WHERE, ORDER BY, DISTINCT)
+-- -----------------------------------------------------------------------------
+
+-- Obtener todos los registros y columnas
+SELECT * FROM t_personal;
+
+-- Seleccionar columnas específicas
+SELECT nombre, email FROM t_personal;
+
+-- Filtrar registros con condición WHERE
+SELECT * FROM t_personal WHERE ciudad = 'Temuco';
+
+-- Búsqueda por patrón con LIKE
+SELECT * FROM t_personal WHERE nombre LIKE 'A%';
+
+-- Filtrar por lista de valores especificados con IN
+SELECT * FROM t_personal 
+WHERE ciudad IN ('Concepción', 'Temuco', 'Valdivia');
+
+-- Ordenar resultados de forma ascendente (ASC)
+SELECT * FROM t_personal ORDER BY nombre ASC;
+
+-- Ordenar resultados de forma descendente (DESC)
+SELECT * FROM t_personal ORDER BY nombre DESC;
+
+-- Obtener una lista de valores únicos (sin duplicados)
+SELECT DISTINCT ciudad FROM t_personal;
+
+
+-- -----------------------------------------------------------------------------
+-- 6. DICCIONARIO DE DATOS (INFORMATION_SCHEMA) Y DDI
+-- -----------------------------------------------------------------------------
+
+-- Listar todas las bases de datos usando information_schema (Estándar SQL)
+SELECT schema_name 
+FROM information_schema.schemata;
+
+-- Listar bases de datos usando especificidad de dialecto MySQL/MariaDB
+SHOW DATABASES;
+
+-- Listar tablas de una base de datos con information_schema
+SELECT table_name 
+FROM information_schema.tables 
+WHERE table_schema = 'esquema';
+
+-- Listar tablas usando dialecto MySQL/MariaDB
+USE esquema;
+SHOW TABLES;
+
+-- Consultar metadatos e información detallada de columnas
+SELECT column_name, data_type, is_nullable, column_default 
+FROM information_schema.columns 
+WHERE table_schema = 'esquema' AND table_name = 't_personal';
+
+-- Describir estructura de tabla usando dialecto MySQL/MariaDB
+DESCRIBE esquema.t_personal;
+DESC esquema.t_personal;
