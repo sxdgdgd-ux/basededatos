@@ -1,0 +1,77 @@
+Ejemplos de consultas 
+/*
+Consultas a Base de datos
+Para obtener una lista de todas las bases de datos en el servidor, se puedes ulitizar la siguiente
+cosulta.
+*/
+
+SELECT schema_name
+FROM information_schema.schemata;
+
+-- Comando SHOW
+/*
+Una consulta similar a la anterior es utilizado el comando "SHOW".
+Nota: La Sentencia SHOW no está disponible en todos los DBMS, es un comando específico del dialecto de mySQL
+*/
+
+SHOW DATABASES;
+
+-- Consultas a Tablas
+/*
+Para listar todas las tablas dentro de la base de datos "mi_base_de_datos".
+*/
+
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = "mi_base_de_datos";
+
+/*Como por ejemplo, para una base de datos llamada "empresa" sería así...*/
+
+SELECT table_name
+FROM information_schema.tables
+WHERE table schema = "empresa";
+
+
+-- El comando "SHOW" también ofrece una alternativa
+
+USE empresa;
+SHOW TABLES;
+
+-- Consultas a Columnas 
+/*
+Para obtener información detallada sobre las columnas de una tabla en particular, incluyendo su tipo de dato, si admiten nulos
+y sus valores por defecto, utilice una consulta similar a la siguiente.
+*/
+
+SELECT column_name,
+data_type,
+is_nullable,
+column_default
+
+FROM information_schema.columns 
+
+WHERE table_schema = 'mi_base_de_datos' AND 
+table_name = 'mi_tabla';
+
+-- Por ejemplo...
+SELECT column_name,
+data_type,
+is_nullable,
+column_default
+FROM information_schema.columns
+WHERE table_schema ='empresa' AND
+table_name ='t_personal';
+
+-- DESCRIBE o DESC : Una vista similar de la estructura de una tabla.
+DESCRIBE mi_base_de_datos.mi_tabla;
+
+-- Por ejemplo...
+DESCRIBE empresa.t_personal;
+-- O
+DESC empresa.t_personal;
+
+/*
+Nota : La sentencia DESCRIBE (o DESC) no está disponible en todas los DBMS, es un comando específico del dialecto de mySQL
+y MariaDB, no un estándar universal.
+*/
+
