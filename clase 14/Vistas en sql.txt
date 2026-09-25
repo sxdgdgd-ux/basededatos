@@ -3,3 +3,38 @@
 Una vista es una consulta SQL almacenada que se comporta como una tabla virtual
 No almacena datos fisicamente, sino que muestra el resultado de una consulta cada vez que 
 se accede a ella. */
+
+-- ELEMENTOS DE LAS VISTAS 
+-- Componentes principales
+Nombre de la vista : Identificador Unico
+Consulta SELECT : Define qué datos mostrar
+Columnas : Pueden ser renombradas o calculadas 
+
+-- TIPOS DE VISTAS 
+/*
+Vistas simples
+se basan en una sola tablano contienen funciones de grupo (count,sum,etc)
+no contienen GROUP BY, DISTINCT, o subconsultas complejas
+Generalmente perminten operaciones DML (INSERT,UPDATE,DELETE)
+
+Vistas complejas
+se basan en multiples tablas(Joins)
+Contienen funciones de grupo, GROUP BY, DISTINCT
+pueden incluir subconsultas y expresiones calculadas
+Generalmente son de solo lectura 
+*/
+
+-- SINTAXIS PARA CREAR VISTA 
+CREATE BIEW nombre_vista AS
+SELECT columnas 
+FROM tablas
+WHERE condiciones;
+
+
+-- EJEMPLOS PRACTICOS:
+Vistas.sql 
+
+--Crea la base de datos vistas 
+DROP DATABASE IF EXISTS vistas;
+CREATE DATABASE vistas;
+USE vistas;
