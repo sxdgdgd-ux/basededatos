@@ -1,0 +1,5 @@
+/* Creacion y ulitizacion de vistas simples y complejas 
+¿Qué son las Vistas en SQL?
+Una vista es una consulta SQL almacenada que se comporta como una tabla virtual
+No almacena datos fisicamente, sino que muestra el resultado de una consulta cada vez que 
+se accede a ella. */
