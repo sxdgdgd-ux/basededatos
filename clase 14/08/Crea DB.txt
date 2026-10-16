@@ -87,3 +87,77 @@ ACTUALIZAR TABLAS O REGISTROS
 ELIMINAR TABLA O COSA 
 INGRESAR REGISTROS INSERT 
 */
+
+-- Consultas a indices
+
+SELECT index_name, column_name, non_unique, seq_
+
+
+-- EJEMPLO:
+SELECT index_name,
+column_name,
+non_unique
+seq_in_index
+FROM information_schema.statistics
+WHERE table_schema = 'esquema' AND table_name='t_personal';
+
+
+
+-- EL COMANDO "SHOW INDEX" ofrece una salida similar
+
+SHOW INDEX
+FROM mi_tabla
+FROM mi_base_de_datos;
+
+
+-- EJEMPLO...
+SHOW INDEX
+FROM t_personal
+FROM esquema;
+
+/* Consultas a Restricciones (Contstraints)
+Las restricciones aseguran la integridad de los datos. Para obtener informacion sobre las restricciones de una tabla
+como claves primarias, claves foraneas y otras, se pueden utilizar las siguientes consultas.
+*/
+
+-- Restricciones de tabla en General
+
+SELECT
+constraint_name,
+constraint_type
+FROM
+information_schema.table_constraints
+WHERE
+table_schema = 'mi_base_de_datos' AND
+table_name = 'mi_tabla';
+
+
+-- EJEMPLO 
+
+SELECT 
+constraint_name,
+constraint_type
+FROM
+information_schema.table_constraints
+WHERE
+table_schema = 'esquema' AND
+table_name = 't_personal';
+
+/* Detalles de Claves foraneas
+Para obtener informacion detallada sobre las claves foraneas, incluyendo las tablas y columnas referenciadas.*/
+
+SELECT
+k.constraint_name,
+k.column_name,
+k.referenced_table_name,
+k.referenced_column_name
+FROM
+information_schema.key_column_usage as k
+JOIN
+information_schema.table_constraints as t
+ON k.constraint_name = t.contstraint_name
+AND k.table_nameschema = t.table_schema
+WHERE
+t.constraint_type ='FOREIGN KEY'
+AND k.table_schema ='mi_base_de_datos'
+AND k.table_name = 'mi_tabla';
