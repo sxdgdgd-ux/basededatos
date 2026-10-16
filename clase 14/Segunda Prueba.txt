@@ -1,0 +1,58 @@
+-- EJERCICIO 1
+SELECT DISTINCT marca, pais_origen
+FROM t_producto
+WHERE activo = TRUE AND stock > 0
+ORDER BY marca, pais_origen;
+
+
+-- EJERCICIO 2
+SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = 'ferreteria' AND TABLE_NAME = 't_producto';
+
+
+-- EJERCICIO 3
+CREATE VIEW v_producto_importado AS
+SELECT sku, nombre, marca, pais_origen, precio
+FROM t_producto
+WHERE activo = TRUE AND pais_origen <> 'Chile';
+
+
+-- EJERCICIO 4
+
+CREATE VIEW v_cliente_empresa AS
+SELECT id, rut, nombre, tipo, comuna, telefono
+FROM t_cliente
+WHERE tipo = 'Empresa';
+
+
+-- EJERCICIO 5
+INSERT INTO v_cliente_empresa (rut, nombre, tipo, comuna, telefono)
+VALUES ('77654321-8', 'Constructora Río Cautín SpA', 'Empresa', 'Padre las Casas', '+56452300400');
+
+
+-- EJERCICIO 6
+CREATE TABLE t_cotizacion
+(
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT UNSIGNED NOT NULL,
+    monto DECIMAL(12,2) NOT NULL,
+    validez_dias TINYINT UNSIGNED NOT NULL DEFAULT 15,
+    fecha DATE NOT NULL
+);
+
+
+-- EJERCICO 7
+INSERT INTO t_cotizacion (cliente_id, monto, fecha)
+VALUES (6, 156900.00, '2026-10-06'),
+        (12, 912300.00, '2026-10-07');
+
+-- EJERCICIO 8
+CREATE INDEX i_producto_marca ON t_producto (marca);
+CREATE INDEX i_vendedor_apellido ON t_vendedor (apellido);
+
+-- EJERCICIO 9 
+CREATE INDEX i_cliente_comuna_tipo ON t_cliente(comuna, tipo);
+
+-- EJERCICIO 10 
+CREATE INDEX i_venta_medio_pago_fecha ON t_venta(medio_pago, fecha);
