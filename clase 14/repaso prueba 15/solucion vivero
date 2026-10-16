@@ -1,0 +1,398 @@
+-- =========================================================================
+-- GUÍA DE EJERCICIOS 2.2 - BASES DE DATOS ESTRUCTURADAS
+-- Escenario: Vivero Los Copihues
+-- Profesor: Patricio Briones Bonvallet
+-- Institución: INACAP - Área Tecnologías de Información y Ciberseguridad
+-- Instrucción: Guardar este archivo como Guia2.sql y ejecutar en MySQL 8.0+
+-- =========================================================================
+
+-- Asegurarse de utilizar la base de datos 'vivero'
+USE vivero;
+
+
+-- =========================================================================
+-- PARTE 0: Consultas de repaso (Calentamiento)
+-- =========================================================================
+
+-- Ejercicio 1
+-- Muestre las ciudades (distintas y sin repetir) donde viven los clientes, ordenadas alfabéticamente.
+SELECT DISTINCT ciudad 
+FROM t_cliente 
+ORDER BY ciudad;
+
+
+-- Ejercicio 2
+-- Muestre código, nombre, precio y stock de las plantas que requieren luz de tipo 'Sombra', ordenadas de mayor a menor precio.
+SELECT codigo, nombre, precio, stock
+FROM t_planta
+WHERE tipo_luz = 'Sombra'
+ORDER BY precio DESC;
+
+
+-- Ejercicio 3
+-- Muestre nombre, apellido, cargo y fecha de contrato de los empleados activos, comenzando por el empleado con más antigüedad.
+SELECT nombre, apellido, cargo, fecha_contrato
+FROM t_empleado
+WHERE activo = TRUE
+ORDER BY fecha_contrato ASC;
+
+
+-- =========================================================================
+-- PARTE 1: Consultas al diccionario de datos
+-- =========================================================================
+
+-- Ejercicio 4
+-- Liste todas las bases de datos del servidor consultando information_schema. Luego obtenga el mismo listado utilizando el comando SHOW.
+SELECT SCHEMA_NAME FROM information_schema.schemata;
+SHOW DATABASES;
+
+
+-- Ejercicio 5
+-- Liste las tablas de la base de datos vivero usando information_schema.tables. Luego obtenga el mismo listado con SHOW TABLES.
+SELECT TABLE_NAME 
+FROM information_schema.tables 
+WHERE table_schema = 'vivero';
+
+SHOW TABLES;
+
+
+-- Ejercicio 6
+-- Muestre el nombre de la columna, el tipo de dato, si admite valores nulos y el valor por defecto de todas las columnas de la tabla t_planta.
+SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT
+FROM information_schema.columns
+WHERE table_schema = 'vivero' 
+  AND table_name = 't_planta'
+ORDER BY ordinal_position;
+
+
+-- Ejercicio 7
+-- Muestre la estructura de la tabla t_venta utilizando DESCRIBE (o DESC).
+DESCRIBE vivero.t_venta;
+
+
+-- Ejercicio 8
+-- Muestre el nombre y el tipo de dato de las columnas de la tabla t_cliente que admiten valores nulos.
+SELECT COLUMN_NAME, DATA_TYPE
+FROM information_schema.columns
+WHERE table_schema = 'vivero' 
+  AND table_name = 't_cliente' 
+  AND is_nullable = 'YES';
+
+
+-- Ejercicio 9
+-- Liste el nombre de la tabla, el nombre de la columna y el tipo de dato de todas las columnas de la base de datos vivero que almacenan fechas u horas.
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE
+FROM information_schema.columns
+WHERE table_schema = 'vivero' 
+  AND data_type IN ('date', 'datetime', 'timestamp', 'time', 'year')
+ORDER BY table_name, column_name;
+
+
+-- Ejercicio 10
+-- Liste los índices de la tabla t_venta consultando information_schema.statistics. Luego obtenga la misma información con SHOW INDEX.
+SELECT INDEX_NAME, COLUMN_NAME, NON_UNIQUE, SEQ_IN_INDEX
+FROM information_schema.statistics
+WHERE table_schema = 'vivero' 
+  AND table_name = 't_venta';
+
+SHOW INDEX FROM t_venta FROM vivero;
+
+
+-- Ejercicio 11
+-- Muestre el nombre y el tipo de todas las restricciones (constraints) de la tabla t_planta.
+SELECT CONSTRAINT_NAME, CONSTRAINT_TYPE
+FROM information_schema.table_constraints
+WHERE table_schema = 'vivero' 
+  AND table_name = 't_planta';
+
+
+-- Ejercicio 12
+-- Muestre el detalle de las claves foráneas de la tabla t_venta.
+SELECT k.constraint_name, k.column_name, k.referenced_table_name, k.referenced_column_name
+FROM information_schema.key_column_usage AS k
+JOIN information_schema.table_constraints AS t
+  ON k.constraint_name = t.constraint_name 
+  AND k.table_schema = t.table_schema
+WHERE t.constraint_type = 'FOREIGN KEY' 
+  AND k.table_schema = 'vivero' 
+  AND k.table_name = 't_venta';
+
+
+-- =========================================================================
+-- PARTE 2: Creación y utilización de vistas simples y complejas
+-- =========================================================================
+
+-- Ejercicio 13
+-- Cree la vista v_planta_interior que muestre id, código, nombre, precio y stock de las plantas aptas para interior.
+CREATE VIEW v_planta_interior AS
+SELECT id, codigo, nombre, precio, stock
+FROM t_planta
+WHERE apta_interior = TRUE;
+
+SELECT * FROM v_planta_interior;
+
+
+-- Ejercicio 14
+-- Cree la vista v_planta_stock_critico que muestre id, código, nombre y stock de las plantas cuyo stock sea menor a 10 unidades.
+CREATE VIEW v_planta_stock_critico AS
+SELECT id, codigo, nombre, stock 
+FROM t_planta 
+WHERE stock < 10;
+
+SELECT * FROM v_planta_stock_critico;
+
+
+-- Ejercicio 15
+-- Cree la vista v_cliente_temuco que muestre id, RUT, nombre, apellido, ciudad y año de registro de los clientes que viven en Temuco.
+CREATE VIEW v_cliente_temuco AS
+SELECT id, rut, nombre, apellido, ciudad, anio_registro
+FROM t_cliente
+WHERE ciudad = 'Temuco';
+
+SELECT * FROM v_cliente_temuco;
+
+
+-- Ejercicio 16
+-- Cree la vista v_empleado_vendedor que muestre id, nombre, apellido, sueldo y hora de entrada de los empleados con cargo 'Vendedor' activos.
+CREATE VIEW v_empleado_vendedor AS
+SELECT id, nombre, apellido, sueldo, hora_entrada
+FROM t_empleado
+WHERE cargo = 'Vendedor' 
+  AND activo = TRUE;
+
+SELECT * FROM v_empleado_vendedor;
+
+
+-- Ejercicio 17
+-- A través de la vista v_planta_stock_critico, aumente en 20 unidades el stock de la planta de código 'OR-002'.
+UPDATE v_planta_stock_critico
+SET stock = stock + 20
+WHERE codigo = 'OR-002';
+
+SELECT * FROM v_planta_stock_critico;
+SELECT codigo, nombre, stock FROM t_planta WHERE codigo = 'OR-002';
+
+
+-- Ejercicio 18
+-- A través de la vista v_cliente_temuco, inserte el cliente: RUT '22345678-1', nombre 'Martina', apellido 'Ñancupil', ciudad 'Temuco', año 2026.
+INSERT INTO v_cliente_temuco (rut, nombre, apellido, ciudad, anio_registro)
+VALUES ('22345678-1', 'Martina', 'Ñancupil', 'Temuco', 2026);
+
+SELECT * FROM v_cliente_temuco;
+
+
+-- Ejercicio 19
+-- A través de la vista v_planta_interior, aumente en un 5% el precio de la planta de código 'IN-002'.
+UPDATE v_planta_interior
+SET precio = precio * 1.05
+WHERE codigo = 'IN-002';
+
+SELECT codigo, nombre, precio FROM t_planta WHERE codigo = 'IN-002';
+
+
+-- Ejercicio 20
+-- Cree la vista compleja v_planta_detalle uniendo t_planta y t_categoria. Muestre plantas de 'Árboles nativos' ordenadas por mayor precio.
+CREATE VIEW v_planta_detalle AS
+SELECT p.codigo, p.nombre, c.nombre AS categoria, p.precio, p.stock, p.tipo_luz
+FROM t_planta p
+INNER JOIN t_categoria c ON p.categoria_id = c.id;
+
+SELECT *
+FROM v_planta_detalle
+WHERE categoria = 'Árboles nativos'
+ORDER BY precio DESC;
+
+
+-- Ejercicio 21
+-- Cree la vista compleja v_venta_detalle con número de venta, fecha_hora, cliente, ciudad, planta, vendedor, cantidad, precio_unitario y total.
+CREATE VIEW v_venta_detalle AS
+SELECT v.id AS venta, v.fecha_hora,
+       cl.nombre AS cliente_nombre, cl.apellido AS cliente_apellido, cl.ciudad,
+       p.nombre AS planta, e.nombre AS vendedor,
+       v.cantidad, v.precio_unitario,
+       (v.cantidad * v.precio_unitario) AS total
+FROM t_venta v
+INNER JOIN t_cliente cl ON v.cliente_id = cl.id
+INNER JOIN t_planta p ON v.planta_id = p.id
+INNER JOIN t_empleado e ON v.empleado_id = e.id;
+
+SELECT * FROM v_venta_detalle;
+
+
+-- Ejercicio 22
+-- Utilizando v_venta_detalle, muestre venta, fecha_hora, cliente, planta y total de ventas a clientes de Temuco, ordenadas por mayor total.
+SELECT venta, fecha_hora, cliente_nombre, cliente_apellido, planta, total
+FROM v_venta_detalle
+WHERE ciudad = 'Temuco'
+ORDER BY total DESC;
+
+
+-- Ejercicio 23 (Desafío opcional)
+-- Cree la vista v_venta_por_vendedor con nombre y apellido de cada vendedor, cantidad de ventas y monto total vendido.
+CREATE VIEW v_venta_por_vendedor AS
+SELECT e.nombre, e.apellido, 
+       COUNT(*) AS cantidad_ventas, 
+       SUM(v.cantidad * v.precio_unitario) AS monto_total
+FROM t_venta v 
+INNER JOIN t_empleado e ON v.empleado_id = e.id
+GROUP BY e.id, e.nombre, e.apellido;
+
+SELECT * FROM v_venta_por_vendedor ORDER BY monto_total DESC;
+
+
+-- Ejercicio 24
+-- Consulte information_schema.views para listar el nombre de cada vista y si es actualizable (is_updatable).
+SELECT TABLE_NAME, IS_UPDATABLE
+FROM information_schema.views
+WHERE table_schema = 'vivero';
+
+
+-- Ejercicio 25
+-- Elimine la vista v_empleado_vendedor y verifique su eliminación en el diccionario.
+DROP VIEW v_empleado_vendedor;
+
+SELECT TABLE_NAME
+FROM information_schema.views
+WHERE table_schema = 'vivero';
+
+
+-- =========================================================================
+-- PARTE 3: Creación y utilización de secuencias (AUTO_INCREMENT)
+-- =========================================================================
+
+-- Ejercicio 26
+-- Desactivar caché de estadísticas de information_schema y consultar el próximo valor AUTO_INCREMENT por tabla base.
+SET SESSION information_schema_stats_expiry = 0;
+
+SELECT TABLE_NAME, AUTO_INCREMENT
+FROM information_schema.tables
+WHERE table_schema = 'vivero' 
+  AND table_type = 'BASE TABLE';
+
+
+-- Ejercicio 27
+-- Cree la tabla t_proveedor (id con AUTO_INCREMENT desde 100, nombre obligatorio, ciudad, telefono) e inserte 3 proveedores.
+CREATE TABLE t_proveedor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    ciudad VARCHAR(60),
+    telefono CHAR(12)
+) AUTO_INCREMENT = 100;
+
+INSERT INTO t_proveedor (nombre, ciudad, telefono) VALUES
+('Viveros del Cautín', 'Temuco', '+56452111111'),
+('Semillas Araucanía', 'Lautaro', '+56452222222'),
+('Sustratos del Sur', 'Osorno', '+56642333333');
+
+SELECT * FROM t_proveedor;
+
+
+-- Ejercicio 28
+-- Elimine el proveedor con id 102 e inserte 'Macetas Llaima' de 'Cunco'.
+DELETE FROM t_proveedor WHERE id = 102;
+
+INSERT INTO t_proveedor (nombre, ciudad)
+VALUES ('Macetas Llaima', 'Cunco');
+
+SELECT * FROM t_proveedor;
+
+
+-- Ejercicio 29
+-- Modifique t_proveedor para que el próximo id sea 500. Luego inserte 'Riego Tolhuaca' de 'Curacautín'.
+ALTER TABLE t_proveedor AUTO_INCREMENT = 500;
+
+INSERT INTO t_proveedor (nombre, ciudad)
+VALUES ('Riego Tolhuaca', 'Curacautín');
+
+SELECT * FROM t_proveedor;
+
+
+-- Ejercicio 30
+-- Cree t_despacho. Configure incremento y offset de AUTO_INCREMENT, inserte despachos y restablezca parámetros a 1.
+CREATE TABLE t_despacho (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    venta_id BIGINT UNSIGNED NOT NULL,
+    direccion VARCHAR(150) NOT NULL,
+    fecha DATE NOT NULL
+);
+
+SET SESSION auto_increment_increment = 10;
+SET SESSION auto_increment_offset = 5;
+
+INSERT INTO t_despacho (venta_id, direccion, fecha) VALUES
+(5007, 'Camino a Pucón km 3, Villarrica', '2026-04-19'),
+(5008, 'Camino a Pucón km 3, Villarrica', '2026-04-19'),
+(5021, 'Escuela Rural Los Robles, Pucón', '2026-08-23');
+
+SELECT * FROM t_despacho;
+
+SET SESSION auto_increment_increment = 1;
+SET SESSION auto_increment_offset = 1;
+
+
+-- =========================================================================
+-- PARTE 4: Creación de índices no únicos
+-- =========================================================================
+
+-- Ejercicio 31
+-- Muestre los índices de la tabla t_planta con SHOW INDEX.
+SHOW INDEX FROM t_planta;
+
+
+-- Ejercicio 32
+-- Cree el índice no único i_planta_nombre sobre la columna nombre de t_planta y verifíquelo en information_schema.statistics.
+CREATE INDEX i_planta_nombre ON t_planta (nombre);
+
+SELECT INDEX_NAME, COLUMN_NAME, NON_UNIQUE
+FROM information_schema.statistics
+WHERE table_schema = 'vivero' 
+  AND table_name = 't_planta';
+
+
+-- Ejercicio 33
+-- Cree el índice no único i_cliente_ciudad sobre t_cliente y verifíquelo con SHOW INDEX.
+CREATE INDEX i_cliente_ciudad ON t_cliente (ciudad);
+
+SHOW INDEX FROM t_cliente;
+
+
+-- Ejercicio 34
+-- Cree el índice compuesto i_empleado_apellido_nombre sobre apellido y nombre en t_empleado. Verifique seq_in_index.
+CREATE INDEX i_empleado_apellido_nombre ON t_empleado (apellido, nombre);
+
+SELECT INDEX_NAME, COLUMN_NAME, SEQ_IN_INDEX
+FROM information_schema.statistics
+WHERE table_schema = 'vivero' 
+  AND table_name = 't_empleado' 
+  AND index_name = 'i_empleado_apellido_nombre';
+
+
+-- Ejercicio 35
+-- Cree el índice no único i_venta_fecha_hora sobre t_venta y verifíquelo con SHOW INDEX.
+CREATE INDEX i_venta_fecha_hora ON t_venta (fecha_hora);
+
+SHOW INDEX FROM t_venta;
+
+
+-- Ejercicio 36
+-- Cree el índice no único i_planta_tipo_luz sobre la columna tipo_luz de t_planta y compare su cardinalidad con i_planta_nombre.
+CREATE INDEX i_planta_tipo_luz ON t_planta (tipo_luz);
+
+SHOW INDEX FROM t_planta;
+ANALYZE TABLE t_planta;
+
+
+-- Ejercicio 37
+-- Liste desde information_schema.statistics todos los índices no únicos de la base de datos vivero, ordenados adecuadamente.
+SELECT TABLE_NAME, INDEX_NAME, COLUMN_NAME
+FROM information_schema.statistics
+WHERE table_schema = 'vivero' 
+  AND non_unique = 1
+ORDER BY table_name, index_name, seq_in_index;
+
+
+-- Ejercicio 38
+-- Elimine el índice i_planta_tipo_luz y verifique su eliminación.
+DROP INDEX i_planta_tipo_luz ON t_planta;
+
+SHOW INDEX FROM t_planta;
