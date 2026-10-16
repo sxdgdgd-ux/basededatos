@@ -162,8 +162,6 @@ INSERT INTO t_venta (cliente_id, producto_id, vendedor_id, cantidad, precio_unit
 (12, 12, 1,  6, 15990.00, 'Transferencia', '2026-09-15');
 
 -- EJERCICIO 1
-/* La generencia neceista baser con que combinacion de marca y pais origen trabaja actualmente
-la ferreteria. muestre, sin repertir, la marca y el pais de origen de los productos activos que tengan stock disponible ordenandos de manera alfabetica*/
 SELECT DISTINCT marca, pais_origen
 FROM t_producto
 WHERE activo = TRUE AND stock > 0
@@ -171,14 +169,12 @@ ORDER BY marca, pais_origen;
 
 
 -- EJERCICIO 2
-/* Consulta con information_schema, el cual muestra el nombre de la columna, el tipo de dato y si admite valores nulos y el valor por defecto de todas las columnas de la tabla t_producto de la base de datos ferreteria. */
 SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT
 FROM information_schema.COLUMNS
 WHERE TABLE_SCHEMA = 'ferreteria' AND TABLE_NAME = 't_producto';
 
 
 -- EJERCICIO 3
-/* Crea la vista simple "v_producto_importado" que muestre SKU, nombre, marca y paos de origen y precio de los productos activos cuyo pais de origen sea distintio de 'Chile' */
 CREATE VIEW v_producto_importado AS
 SELECT sku, nombre, marca, pais_origen, precio
 FROM t_producto
@@ -187,8 +183,6 @@ WHERE activo = TRUE AND pais_origen <> 'Chile';
 
 
 -- EJERCICIO 4
-/* a traves de la vista creada "v_cliente_empresa" que muestre id, RUT, nombre, tipo, comuna y telefono de los clinetes de tipo 'Empresa'. */
-CREATE VIEW v_cliente_empresa AS
 SELECT id, rut, nombre, tipo, comuna, telefono
 FROM t_cliente
 WHERE tipo = 'Empresa';
@@ -197,25 +191,10 @@ WHERE tipo = 'Empresa';
 
 
 -- EJERCICIO 5
-/* a traves de la vista creada "v_cliente_empresa", insertar el siguiente clinete:
-rut 77654321-8
-constructora Rio cautin SpA
-tipo empresa
-comuna padre las casas
-telefono +56452300400
-*/
 INSERT INTO v_cliente_empresa (rut, nombre, tipo, comuna, telefono)
 VALUES ('77654321-8', 'Constructora Río Cautín SpA', 'Empresa', 'Padre las Casas', '+56452300400');
 
 -- EJERCICIO 6
-/* la ferreteria comenzara a registrar las cotizaciones que entrega a sus clientes. Cree la tabla t_cotizacion con las siguientes columnas:
-id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-cliente_id  INT UNSIGNED NOT NULL,
-monto DECIMAL(12,2) NOT NULL,
-validez_dias TINYINT UNSIGNED  NOT NULL, DEFAULT 15,
-fecha DATE NOT NULL
-*/
-
 CREATE TABLE t_cotizacion
 (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -226,24 +205,16 @@ CREATE TABLE t_cotizacion
 );
 
 -- EJERCICO 7
-/* inserte en t_cotizacion los siguientes contizaciones, sin indicar el id ni la validez (debe aplicarse por defecto):
-cliente_id monto fecha
-6 156900.00 2026-10-06
-12 912300.00 2026-10-07
-*/
 INSERT INTO t_cotizacion (cliente_id, monto, fecha)
 VALUES (6, 156900.00, '2026-10-06'),
         (12, 912300.00, '2026-10-07');
 
 -- EJERCICIO 8
-/* los vendedores buscan frecuentemente productos por su marca y la administracion busca a los vendedores por su apellido. Cree los indices no unicos i_producto_marca e i_vendedor_apellido sobre las columnas correspondientes.*/
 CREATE INDEX i_producto_marca ON t_producto (marca);
 CREATE INDEX i_vendedor_apellido ON t_vendedor (apellido);
 
 -- EJERCICIO 9 
-/* El area de despacho filtra a los clientes por comunas y dentro de cada comuna por tipo de cliente. cree el indice compuesto i_cliente_comuna_tipo sobre ambas columnas, en ese orden. */
 CREATE INDEX i_cliente_comuna_tipo ON t_cliente(comuna, tipo);
 
 -- EJERCICIO 10 
-/* contabilidad consulta frecuentemente las ventas de un determinado medio de pago dentro de un rango de feechas. cree sobre t_venta el indice compuesto i_venta_medio_pago_fecha con las columnas medio de pago y fecha, en ese orden.*/
 CREATE INDEX i_venta_medio_pago_fecha ON t_venta(medio_pago, fecha);
