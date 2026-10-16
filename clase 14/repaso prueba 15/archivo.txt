@@ -1,0 +1,8 @@
+GitHub Copilot
+https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat
+Nombre: GitHub Copilot Chat
+ID: GitHub.copilot-chat
+Descripción: AI chat features powered by Copilot
+Versión: 0.69.0
+Editor: GitHub
+Vínculo de VS Marketplace: https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat

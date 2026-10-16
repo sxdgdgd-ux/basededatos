@@ -1,0 +1,57 @@
+-- =========================================================================
+-- MODIFICACIONES Y CAMBIOS DIRECTOS EN TABLAS (MySQL 8)
+-- =========================================================================
+
+USE vivero;
+
+-- -------------------------------------------------------------------------
+-- 1. MODIFICAR LA ESTRUCTURA DE UNA TABLA EXISTENTE (ALTER TABLE)
+-- Ejemplo: Agregar una columna nueva, modificar su tipo de dato o renombrarla
+-- -------------------------------------------------------------------------
+
+-- Agregar una columna de descuento o correo secundario a la tabla de clientes
+ALTER TABLE t_cliente 
+ADD COLUMN fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+-- Modificar el tipo de dato o tamaño de una columna existente
+ALTER TABLE t_cliente 
+MODIFY COLUMN telefono VARCHAR(20) NULL; -- Ampliamos el campo por si el formato internacional es más largo
+
+
+-- -------------------------------------------------------------------------
+-- 2. GESTIÓN DE RESTRICCIONES (CONSTRAINTS) Y CLAVES FORÁNEAS
+-- Ejemplo: Añadir o quitar restricciones directamente sobre la tabla
+-- -------------------------------------------------------------------------
+
+-- Agregar una restricción CHECK para asegurar que el precio nunca sea negativo
+ALTER TABLE t_planta 
+ADD CONSTRAINT chk_precio_positivo CHECK (precio > 0);
+
+-- Si necesitas eliminar una restricción de clave foránea o un índice UNIQUE existente:
+-- ALTER TABLE t_planta DROP FOREIGN KEY fk_planta_categoria;
+-- ALTER TABLE t_planta DROP INDEX codigo;
+
+
+-- -------------------------------------------------------------------------
+-- 3. CAMBIOS EN EL COMPORTAMIENTO DE AUTO_INCREMENT (Secuencias)
+-- Ejemplo: Forzar o reiniciar el puntero de autoincremento de una tabla
+-- -------------------------------------------------------------------------
+
+-- Modificar el próximo valor del ID en la tabla de proveedores o ventas
+ALTER TABLE t_proveedor AUTO_INCREMENT = 1000;
+
+
+-- -------------------------------------------------------------------------
+-- 4. MANEJO DE VISTAS ACTUALIZABLES CON CAMBIOS EN TABLAS BASE
+-- Si modificas datos a través de vistas complejas o simples:
+-- -------------------------------------------------------------------------
+
+-- Actualización de stock a través de una vista (afecta directamente a la tabla base t_planta)
+UPDATE v_planta_stock_critico 
+SET stock = stock + 15 
+WHERE codigo = 'OR-001';
+
+-- Verificar el reflejo del cambio directamente en la tabla base
+SELECT codigo, nombre, stock 
+FROM t_planta 
+WHERE codigo = 'OR-001';

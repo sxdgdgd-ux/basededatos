@@ -1,0 +1,144 @@
+-- =========================================================================
+-- GUÍA DE EJERCICIOS 2.2 / 2.3: ENFOQUE ALTERNATIVO Y OPTIMIZADO
+-- =========================================================================
+
+DROP DATABASE IF EXISTS vivero;
+CREATE DATABASE vivero CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE vivero;
+
+-- -------------------------------------------------------------------------
+-- 1. CREACIÓN DE TABLAS CON ÍNDICES INTEGRADOS (Alternativa al ALTER TABLE)
+-- En lugar de crear tablas y luego añadir índices por separado, puedes 
+-- definirlos directamente o usar restricciones en línea.
+-- -------------------------------------------------------------------------
+
+CREATE TABLE t_categoria (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion TEXT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE t_planta (
+    id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    codigo CHAR(6) NOT NULL UNIQUE,
+    nombre VARCHAR(80) NOT NULL,
+    nombre_cientifico VARCHAR(120) NULL,
+    categoria_id TINYINT UNSIGNED NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
+    stock SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    altura_cm FLOAT NULL,
+    riego_semanal_lt DOUBLE NULL,
+    tipo_luz ENUM('Sol', 'Semisombra', 'Sombra') NOT NULL,
+    apta_interior BOOLEAN NOT NULL DEFAULT FALSE,
+    fecha_ingreso DATE NOT NULL DEFAULT (CURDATE()),
+    CONSTRAINT fk_planta_categoria FOREIGN KEY (categoria_id) REFERENCES t_categoria(id),
+    -- Definición de índices de búsqueda frecuente directamente en la creación
+    INDEX i_planta_nombre (nombre),
+    INDEX i_planta_tipo_luz (tipo_luz)
+) ENGINE=InnoDB;
+
+CREATE TABLE t_cliente (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    rut VARCHAR(12) NOT NULL UNIQUE,
+    nombre VARCHAR(60) NOT NULL,
+    apellido VARCHAR(60) NOT NULL,
+    email VARCHAR(150) NULL UNIQUE,
+    telefono CHAR(12) NULL,
+    ciudad VARCHAR(60) NOT NULL,
+    anio_registro YEAR NOT NULL,
+    preferencias SET('Frutales', 'Ornamentales', 'Nativas', 'Suculentas', 'Huerta') NULL,
+    -- Índice para filtros frecuentes por ciudad
+    INDEX i_cliente_ciudad (ciudad)
+) ENGINE=InnoDB;
+
+CREATE TABLE t_empleado (
+    id MEDIUMINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(60) NOT NULL,
+    apellido VARCHAR(60) NOT NULL,
+    cargo ENUM('Vendedor', 'Jardinero', 'Bodeguero', 'Administrador') NOT NULL,
+    sueldo INT UNSIGNED NOT NULL,
+    fecha_contrato DATE NOT NULL,
+    hora_entrada TIME NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    -- Índice compuesto directo para ordenamientos de personal
+    INDEX i_empleado_apellido_nombre (apellido, nombre)
+) ENGINE=InnoDB;
+
+CREATE TABLE t_venta (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT UNSIGNED NOT NULL,
+    planta_id SMALLINT UNSIGNED NOT NULL,
+    empleado_id MEDIUMINT UNSIGNED NOT NULL,
+    cantidad TINYINT UNSIGNED NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    fecha_hora DATETIME NOT NULL,
+    registrado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    observacion VARCHAR(200) NULL,
+    CONSTRAINT fk_venta_cliente FOREIGN KEY (cliente_id) REFERENCES t_cliente(id),
+    CONSTRAINT fk_venta_planta FOREIGN KEY (planta_id) REFERENCES t_planta(id),
+    CONSTRAINT fk_venta_empleado FOREIGN KEY (empleado_id) REFERENCES t_empleado(id),
+    -- Índice para rangos de fechas requeridos por administración
+    INDEX i_venta_fecha_hora (fecha_hora)
+) ENGINE=InnoDB AUTO_INCREMENT = 5001;
+
+
+-- -------------------------------------------------------------------------
+-- 2. CONSULTAS DE REPASO (Formas alternativas con funciones o JOINs)
+-- -------------------------------------------------------------------------
+
+-- Ejercicio 1 (Alternativa con GROUP BY en lugar de DISTINCT)
+SELECT ciudad 
+FROM t_cliente 
+GROUP BY ciudad 
+ORDER BY ciudad ASC;
+
+-- Ejercicio 2 (Alternativa usando operadores lógicos y funciones de formato)
+SELECT codigo, nombre, precio, stock
+FROM t_planta
+WHERE tipo_luz LIKE 'Sombra'
+ORDER BY 3 DESC; -- Ordena por la tercera columna seleccionada (precio)
+
+
+-- -------------------------------------------------------------------------
+-- 3. VISTAS Y CONSULTAS COMPLEJAS (Alternativa con ANSI JOIN explícito)
+-- -------------------------------------------------------------------------
+
+-- Vista compleja de detalles de venta utilizando sintaxis moderna y COALESCE para nulos
+CREATE OR REPLACE VIEW v_venta_detalle_alt AS
+SELECT 
+    v.id AS venta,
+    v.fecha_hora,
+    CONCAT(cl.nombre, ' ', cl.apellido) AS cliente_completo, -- Unir nombre y apellido
+    cl.ciudad,
+    p.nombre AS planta,
+    CONCAT(e.nombre, ' ', e.apellido) AS vendedor_completo,
+    v.cantidad,
+    v.precio_unitario,
+    (v.cantidad * v.precio_unitario) AS total
+FROM t_venta v
+JOIN t_cliente cl ON v.cliente_id = cl.id
+JOIN t_planta p ON v.planta_id = p.id
+JOIN t_empleado e ON v.empleado_id = e.id;
+
+-- Consulta basada en la vista alternativa para clientes de Temuco
+SELECT venta, fecha_hora, cliente_completo, planta, total
+FROM v_venta_detalle_alt
+WHERE ciudad = 'Temuco'
+ORDER BY total DESC;
+
+
+-- -------------------------------------------------------------------------
+-- 4. GESTIÓN DE SECUENCIAS E ÍNDICES (Mantenimiento alternativo)
+-- -------------------------------------------------------------------------
+
+-- Consultar estadísticas de índices de forma cruzada en information_schema
+SELECT 
+    TABLE_NAME, 
+    INDEX_NAME, 
+    COLUMN_NAME, 
+    NON_UNIQUE, 
+    CARDINALITY 
+FROM information_schema.STATISTICS 
+WHERE TABLE_SCHEMA = 'vivero' 
+  AND NON_UNIQUE = 1
+ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX;
