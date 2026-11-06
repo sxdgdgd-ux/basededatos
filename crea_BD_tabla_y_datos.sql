@@ -23,3 +23,35 @@ INSERT INTO t_venta VALUES
     (5, 'Impresora', '75000.75', '8', '2024-10-20');
 
 -- Eje 1 Calcular el total de ventas por producto
+SELECT
+    producto,
+    (CAST(precio AS DECIMAL(10,2)) * CAST(cantidad AS UNSIGNED)) AS total_ventas
+FROM t_venta;
+
+-- Eje 2 Mostrar todos los productos vendidos el segundo semestre del 2025 (filtrarlo por rango de fechas)
+SELECT * 
+FROM t_venta
+WHERE CAST(fecha_venta AS DATE) BETWEEN '2025-07-01' AND '2025-12-31';
+
+--  otra manera
+SELECT id, producto, precio, cantidad, fecha_venta
+FROM t_venta
+WHERE CAST(fecha_venta AS DATE) BETWEEN '2025-07-01' AND '2025-12-31';
+
+-- Eje 3 genere un listado de productos, en donde se despliegue el producto y su precio, ordenando numericamente de menor a mayor precio.
+SELECT producto, CAST(precio AS DECIMAL(10,2)) AS precio_numerico
+FROM t_venta
+ORDER BY precio_numerico ASC;
+
+-- Otra manera
+SELECT producto, precio
+FROM t_venta
+ORDER BY CAST(precio AS DECIMAL(10,2));
+
+-- Eje 4 Genere una salida de la tabla ventas con el producto, el precio con el simbolo "$", la cantidad y la fecha en formado dd/mm/aaaa
+SELECT 
+    producto,
+    CONCAT('$', CAST(precio AS DECIMAL(10,2))) AS precio_formato,
+    CAST(cantidad AS UNSIGNED) AS cantidad_numerica,
+    DATE_FORMAT(CAST(fecha_venta AS DATE), '%d/%m/%Y') AS fecha_formato
+    FROM t_venta;
