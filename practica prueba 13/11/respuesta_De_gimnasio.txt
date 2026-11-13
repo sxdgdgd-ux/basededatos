@@ -1,0 +1,379 @@
+-- ====================================================================================================
+
+-- Guía de Ejercicios N° 5 : Índices no únicos y Funciones de una sola fila
+
+-- Caso               : Gimnasio Cordillera
+
+-- ====================================================================================================
+
+
+
+-- ====================================================================================================
+
+-- PARTE A - Índices no únicos
+
+-- ====================================================================================================
+
+
+
+/*
+
+-- Ejercicio A1: Respuestas teóricas
+
+a) Un índice no único permite valores duplicados, mientras que uno único exige valores exclusivos.
+
+b) Ventaja: acelera la búsqueda y filtrado de datos. Costo: ocupa espacio en disco y ralentiza 
+
+   operaciones de modificación (INSERT, UPDATE, DELETE).
+
+c) Cláusulas: SELECT, WHERE, ORDER BY y GROUP BY.
+
+*/
+
+
+
+-- Ejercicio A2: Mostrar índices actuales de las tablas
+
+-- Ambos tienen el índice PRIMARY sobre 'id'. El valor Non_unique es 0 (son únicos).
+
+SHOW INDEX FROM t_socio;
+
+SHOW INDEX FROM t_pago;
+
+
+
+-- Ejercicio A3: Crear índice por ciudad para optimizar búsquedas frecuentes
+
+-- El valor Non_unique es 1, indicando que permite valores repetidos.
+
+CREATE INDEX i_ciudad ON t_socio(ciudad);
+
+SHOW INDEX FROM t_socio;
+
+
+
+-- Ejercicio A4: Crear índice multicolumna para ordenar por apellido y nombre
+
+-- apellido es posición 1, nombre es posición 2. 
+
+-- La consulta WHERE apellido = 'Figueroa' lo aprovecha mejor porque 'apellido' es la primera columna.
+
+CREATE INDEX i_apellido_nombre ON t_socio(apellido, nombre);
+
+SELECT * FROM t_socio ORDER BY apellido, nombre;
+
+
+
+-- Ejercicio A5: Crear índice para optimizar la unión (JOIN) entre tablas
+
+-- Se indexa socio_id. Interviene en la cláusula ON del JOIN.
+
+CREATE INDEX i_pago_socio ON t_pago(socio_id);
+
+SELECT s.nombre, s.apellido, p.fecha_pago, p.monto 
+
+FROM t_socio s 
+
+INNER JOIN t_pago p ON s.id = p.socio_id;
+
+
+
+-- Ejercicio A6: Crear índice para fechas y filtrar inscritos en 2023
+
+-- Acelera comparaciones de igualdad, rangos (BETWEEN) y mayor/menor.
+
+CREATE INDEX i_fecha_inscripcion ON t_socio(fecha_inscripcion);
+
+SELECT * FROM t_socio 
+
+WHERE fecha_inscripcion BETWEEN '2023-01-01' AND '2023-12-31';
+
+
+
+-- Ejercicio A7: Analizar si conviene indexar la columna 'estado'
+
+-- estado tiene 2 valores, ciudad 6, apellido 20. 
+
+-- De más a menos selectiva: apellido, ciudad, estado. 
+
+-- No conviene indexar 'estado' porque tiene muy baja cardinalidad.
+
+SELECT DISTINCT estado FROM t_socio;
+
+SELECT DISTINCT ciudad FROM t_socio;
+
+SELECT DISTINCT apellido FROM t_socio;
+
+
+
+-- Ejercicio A8: Eliminar el índice que no es óptimo (i_estado)
+
+-- (Primero lo creamos para luego borrarlo y comprobar)
+
+CREATE INDEX i_estado ON t_socio(estado);
+
+DROP INDEX i_estado ON t_socio;
+
+SHOW INDEX FROM t_socio;
+
+
+
+/*
+
+-- Ejercicio A9: ¿Por qué no indexar todas las columnas?
+
+No es buena idea porque ralentizaría drásticamente las operaciones de escritura (INSERT, UPDATE, DELETE) 
+
+y consumiría demasiado espacio de almacenamiento de forma innecesaria.
+
+*/
+
+
+
+
+
+-- ====================================================================================================
+
+-- PARTE B - Funciones de una sola fila
+
+-- ====================================================================================================
+
+
+
+/*
+
+-- Ejercicio B1: Respuestas teóricas
+
+a) Funciones de una fila devuelven un resultado por registro evaluado; las de agregado agrupan filas en un solo resultado.
+
+b) Cadena: CONCAT, TRIM, UPPER, LENGTH, SUBSTRING, LOWER.
+
+   Numéricas: ROUND, MOD, CEIL, POWER, ABS, FLOOR.
+
+   Fecha/Hora: YEAR, DATEDIFF, NOW, MONTH, CURDATE, DAY.
+
+   Conversión: CAST.
+
+c) Se usan en SELECT, WHERE, ORDER BY y GROUP BY.
+
+*/
+
+
+
+-- Ejercicio B2: Formatear nombre completo limpiando espacios sobrantes
+
+SELECT id, CONCAT(TRIM(nombre), ' ', TRIM(apellido)) AS nombre_completo 
+
+FROM t_socio;
+
+
+
+-- Ejercicio B3: Formatear textos a mayúsculas y minúsculas
+
+SELECT id, UPPER(TRIM(apellido)) AS apellido_mayus, LOWER(TRIM(email)) AS email_minus 
+
+FROM t_socio;
+
+
+
+-- Ejercicio B4: Generar un código de socio con las primeras letras del apellido y su ID
+
+SELECT id, CONCAT(UPPER(SUBSTRING(TRIM(apellido), 1, 3)), '-', id) AS codigo_socio 
+
+FROM t_socio;
+
+
+
+-- Ejercicio B5: Contar la longitud de caracteres de los correos largos
+
+-- (Opcional: LENGTH cuenta bytes. 'Ñ' ocupa 2 bytes en UTF-8, por lo que Ñancupil da 9 en vez de 8).
+
+SELECT id, TRIM(email) AS email, LENGTH(TRIM(email)) AS largo 
+
+FROM t_socio 
+
+WHERE LENGTH(TRIM(email)) > 18 
+
+ORDER BY largo DESC;
+
+
+
+-- Ejercicio B6: Calcular y redondear el valor de las clases según distintos criterios
+
+-- ROUND en valores .5 redondea estadísticamente hacia el entero más cercano.
+
+SELECT nombre, valor_mensual, 
+
+       valor_mensual / 12 AS valor_clase, 
+
+       ROUND(valor_mensual / 12, 0) AS redondeado, 
+
+       CEIL(valor_mensual / 12) AS hacia_arriba, 
+
+       FLOOR(valor_mensual / 12) AS hacia_abajo 
+
+FROM t_plan;
+
+
+
+-- Ejercicio B7: Calcular el Índice de Masa Corporal (IMC) redondeado a un decimal
+
+SELECT id, CONCAT(TRIM(nombre), ' ', TRIM(apellido)) AS nombre_completo, 
+
+       peso_kg, altura_m, 
+
+       ROUND(peso_kg / POWER(altura_m, 2), 1) AS imc 
+
+FROM t_socio 
+
+ORDER BY imc DESC;
+
+
+
+-- Ejercicio B8: Uso de valor absoluto y residuo de división (módulo)
+
+-- a) Socios que están a más de 5kg de su peso objetivo
+
+SELECT id, nombre, peso_kg, peso_objetivo_kg, 
+
+       ABS(peso_kg - peso_objetivo_kg) AS diferencia_kg 
+
+FROM t_socio 
+
+WHERE ABS(peso_kg - peso_objetivo_kg) > 5;
+
+
+
+-- b) Socios con ID par
+
+SELECT id, nombre, apellido 
+
+FROM t_socio 
+
+WHERE MOD(id, 2) = 0;
+
+
+
+-- Ejercicio B9: Funciones de manipulación y extracción de Fechas
+
+-- a) NOW() trae fecha y hora; CURDATE() solo la fecha.
+
+SELECT NOW() AS actual_con_hora, CURDATE() AS actual_solo_fecha;
+
+
+
+-- b) Inscritos en 2024
+
+SELECT id, nombre, fecha_inscripcion 
+
+FROM t_socio 
+
+WHERE YEAR(fecha_inscripcion) = 2024;
+
+
+
+-- c) Nacidos en marzo
+
+SELECT id, nombre, fecha_nacimiento 
+
+FROM t_socio 
+
+WHERE MONTH(fecha_nacimiento) = 3;
+
+
+
+-- d) Descomponer fecha de inscripción
+
+SELECT id, DAY(fecha_inscripcion) AS dia, 
+
+       MONTH(fecha_inscripcion) AS mes, 
+
+       YEAR(fecha_inscripcion) AS anio 
+
+FROM t_socio;
+
+
+
+-- Ejercicio B10: Calcular diferencia entre fechas
+
+-- a Días de antigüedad desde la inscripción hasta hoy
+
+SELECT id, nombre, fecha_inscripcion, 
+
+       DATEDIFF(CURDATE(), fecha_inscripcion) AS dias_antiguedad 
+
+FROM t_socio 
+
+ORDER BY dias_antiguedad DESC;
+
+
+
+-- b Días de atraso en los pagos
+
+SELECT *, DATEDIFF(fecha_pago, fecha_vencimiento) AS dias_atraso 
+
+FROM t_pago 
+
+WHERE fecha_pago > fecha_vencimiento 
+
+ORDER BY dias_atraso DESC;
+
+
+
+-- c Edad aproximada calculando diferencia de años
+
+SELECT id, nombre, fecha_nacimiento, 
+
+       YEAR(CURDATE()) - YEAR(fecha_nacimiento) AS edad_aprox 
+
+FROM t_socio;
+
+
+
+-- Ejercicio B11: Funciones de Conversión de Tipos de Datos (CAST)
+
+-- a Convertir peso numérico a texto para concatenar
+
+SELECT id, CONCAT(TRIM(nombre), ' ', TRIM(apellido)) AS nombre_completo, 
+
+       CONCAT(CAST(peso_kg AS CHAR), ' kg') AS peso_texto 
+
+FROM t_socio;
+
+
+
+-- b Convertir altura a número entero sin signo
+
+SELECT id, nombre, 
+
+       CAST((altura_m * 100) AS UNSIGNED) AS altura_cm 
+
+FROM t_socio;
+
+-- c Respuestas: CAST('123' AS UNSIGNED) + 1 devuelve un número (124). CAST (123 AS CHAR) devuelve un texto ('123').
+
+
+
+-- Ejercicio B12: Consulta Integradora 
+
+-- Muestra la ficha completa limpiando textos, calculando códigos, IMC y antigüedades
+
+SELECT CONCAT(TRIM(nombre), ' ', UPPER(TRIM(apellido))) AS socio, 
+
+       LOWER(TRIM(email)) AS email, 
+
+       CONCAT(UPPER(SUBSTRING(TRIM(apellido), 1, 3)), '-', id) AS codigo, 
+
+       ROUND(peso_kg / POWER(altura_m, 2), 1) AS imc, 
+
+       YEAR(fecha_inscripcion) AS anio_ingreso, 
+
+       DATEDIFF(CURDATE(), fecha_inscripcion) AS dias_antiguedad 
+
+FROM t_socio 
+
+WHERE TRIM(estado) = 'Activo' 
+
+  AND YEAR(fecha_inscripcion) >= 2023 
+
+ORDER BY dias_antiguedad DESC;

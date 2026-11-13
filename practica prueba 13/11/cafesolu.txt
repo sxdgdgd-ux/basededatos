@@ -1,0 +1,133 @@
+-- ============================================================
+-- Código SQL de Solución
+-- Guía de ejercicios : Funciones de conversión (CAST)
+-- Escenario : Café Ñielol
+-- Asignatura : Bases de Datos Estructuradas
+-- Profesor : Patricio Briones Bonvallet
+-- ============================================================
+
+USE cafe_nielol;
+
+-- Ejercicio 1
+SELECT CAST('00457' AS UNSIGNED) AS numero;
+
+-- Ejercicio 2
+SELECT CAST('1250.756' AS DECIMAL(10,2)) AS monto;
+
+-- Ejercicio 3
+SELECT
+    CAST('2025-12-18 19:45:30' AS DATE) AS fecha,
+    CAST('2025-12-18 19:45:30' AS TIME) AS hora;
+
+-- Ejercicio 4
+SELECT LENGTH(CAST(9876543 AS CHAR)) AS cantidad_digitos;
+
+-- Ejercicio 5
+SELECT
+    nro_boleta,
+    producto,
+    CAST(precio_txt AS UNSIGNED) * CAST(cantidad_txt AS UNSIGNED) AS total
+FROM t_venta_caja;
+
+-- Ejercicio 6 a) Sin conversión
+SELECT producto, precio_txt
+FROM t_venta_caja
+ORDER BY precio_txt;
+
+-- Ejercicio 6 b) Con conversión
+SELECT producto, precio_txt
+FROM t_venta_caja
+ORDER BY CAST(precio_txt AS UNSIGNED);
+
+-- Ejercicio 7 a) Sin conversión
+SELECT producto, cantidad_txt
+FROM t_venta_caja
+WHERE cantidad_txt >= '3';
+
+-- Ejercicio 7 b) Con conversión
+SELECT producto, cantidad_txt
+FROM t_venta_caja
+WHERE CAST(cantidad_txt AS UNSIGNED) >= 3;
+
+-- Ejercicio 8
+SELECT
+    CAST(nro_boleta AS UNSIGNED) AS boleta,
+    producto
+FROM t_venta_caja
+ORDER BY boleta DESC;
+
+-- Ejercicio 9
+SELECT nro_boleta, producto, fecha_hora_txt
+FROM t_venta_caja
+WHERE CAST(fecha_hora_txt AS DATE) BETWEEN '2025-10-01' AND '2025-10-07';
+
+-- Ejercicio 10
+SELECT
+    producto,
+    CAST(fecha_hora_txt AS TIME) AS hora
+FROM t_venta_caja
+WHERE CAST(fecha_hora_txt AS TIME) < '10:00:00'
+ORDER BY hora;
+
+-- Ejercicio 11
+SELECT
+    producto,
+    CAST(precio_txt AS UNSIGNED) * CAST(cantidad_txt AS UNSIGNED) AS total_bruto,
+    CAST(descuento_txt AS DECIMAL(3,2)) AS descuento,
+    ROUND(
+        CAST(precio_txt AS UNSIGNED) * CAST(cantidad_txt AS UNSIGNED)
+        * (1 - CAST(descuento_txt AS DECIMAL(3,2))), 0
+    ) AS total_neto
+FROM t_venta_caja
+WHERE CAST(descuento_txt AS DECIMAL(3,2)) > 0;
+
+-- Ejercicio 12
+SELECT
+    CAST(nro_boleta AS UNSIGNED) AS boleta,
+    UPPER(producto) AS producto,
+    CONCAT('$', CAST(precio_txt AS UNSIGNED)) AS precio,
+    DATE_FORMAT(CAST(fecha_hora_txt AS DATE), '%d/%m/%Y') AS fecha
+FROM t_venta_caja
+WHERE MONTH(CAST(fecha_hora_txt AS DATE)) = 9;
+
+-- Ejercicio 13
+SELECT
+    CONCAT('CAF-', CAST(id AS CHAR), '-', UPPER(SUBSTRING(origen, 1, 3))) AS codigo,
+    nombre
+FROM t_cafe;
+
+-- Ejercicio 14
+SELECT
+    nombre,
+    puntaje_cata,
+    CAST(puntaje_cata AS SIGNED) AS puntaje_cast,
+    FLOOR(puntaje_cata) AS puntaje_floor
+FROM t_cafe;
+
+-- Ejercicio 15
+SELECT
+    nombre,
+    CAST(fecha_hora_tostado AS DATE) AS fecha_tostado,
+    CAST(fecha_hora_tostado AS TIME) AS hora_tostado
+FROM t_cafe
+WHERE CAST(fecha_hora_tostado AS TIME) < '12:00:00'
+ORDER BY fecha_tostado;
+
+-- Ejercicio 16
+SELECT
+    nombre,
+    CAST(fecha_hora_tostado AS DATE) AS fecha_tostado,
+    DATEDIFF('2025-10-20', CAST(fecha_hora_tostado AS DATE)) AS dias_desde_tueste
+FROM t_cafe
+ORDER BY dias_desde_tueste DESC;
+
+-- Ejercicio 17
+SELECT
+    CONCAT(
+        UPPER(nombre), ' | ', origen,
+        ' | Cosecha ', CAST(anio_cosecha AS CHAR),
+        ' | ', CAST(peso_gr AS CHAR), ' g',
+        ' | Tueste ', CAST(tiempo_tueste AS CHAR)
+    ) AS etiqueta
+FROM t_cafe
+WHERE tiempo_tueste > CAST('00:12:00' AS TIME);
