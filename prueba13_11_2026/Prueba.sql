@@ -98,33 +98,33 @@ INSERT INTO t_venta_antigua (nro_boleta, producto, precio_txt, cantidad_txt, des
 ('0004511', 'Estuche Rígido',                '6990',   '4',  '0.00', '2026-11-20 13:30:00'),
 ('0004512', 'Kit de Limpieza',               '8990',   '5',  '0.10', '2026-11-25 15:50:40');
 
--- Ejercicio 1 : Listado de contacto de clientes. ID, cliente (Apellido en mayusculas, una coma, un espacio y el nombre en minusculas), email minusculas, ciudad mayusculas (ordenado alfabeticamente por apellido si considerar espacio sobrantes)
+-- Ejercicio 1 : Listado de contacto de clientes.
 SELECT id, CONCAT(UPPER(TRIM(apellido))), ', ', LOWER(TRIM(nombre)) AS cliente, LOWER(TRIM(email)) AS email, UPPER(TRIM(ciudad)) AS ciudad
 FROM t_cliente
 ORDER BY UPPER(TRIM(apellido));
 
 
--- Ejercicio 2 : Código de cliente. los cliente que su email contenga mas de 20 caracteres tiene que mostrar el texto VC, el id, y las tres primeras letras de la ciudad en mayusculas. "Ejemplo: VC1TEM" ANTES DE CONCATENAR EL TEXTO VC antes de conca
+-- Ejercicio 2 : Código de cliente. 
 SELECT CONCAT('VC', id, UPPER(LEFT(TRIM(ciudad), 3))) AS codigo_cliente
 FROM t_cliente
 WHERE LENGTH(TRIM(email)) > 20;
 
 
--- Ejercicio 3 : Rentabilidad de armazones y lentes de sol. solo para los productos de las categorias "armazon" y "lente de sol" (mostrar nombre, precio, ganancia : precio menos costo y redondeado sin decimales, cuota_3 : valor de cada cuota al pagar 3 cuotas sin interes, redondeado hacia arriba al entero. precio_convenio : precio con 7% de descuento por convenio (precio * 0.93), redondeado hacia abajo al entero
+-- Ejercicio 3 : Rentabilidad de armazones y lentes de sol. 
 SELECT nombre, precio, ROUND(precio - costo) AS ganancia, CEIL(precio / 3) AS cuota_3, FLOOR(precio * 0.93) AS precio_convenio
 FROM t_producto
 WHERE categoria IN ('armazon', 'lente de sol');
 
 
--- Ejercicio 4 : Cristales, credito y bodega. mostrar nombre precio valor neto precio dividido por 1.19 redondeado sin decimales iva precio menos el reto redondeando sin decimales y ordenado de precio mayor a menor
+-- Ejercicio 4 : Cristales, credito y bodega.
 SELECT nombre, precio, ROUND(precio / 1.19) AS valor_neto, ROUND(precio - (precio / 1.19)) AS iva
 FROM t_producto
 WHERE categoria = 'cristal'
 ORDER BY precio DESC;
 
 
--- Ejercicio 5 : Campañas por fecha. (La optica enviara un descuento a los clientes nacidos en noviembre, mostrar nombre, apellido separados por un espacio y sin espacio sobrantes en una columnna llamada "cliente", el dia de naiciemiento en una columna llamada "dia" y el año de nacimiento en una columna llamada "anio_nacimiento" ordenado por dia de nacimiento.)
-SELECT CONCAT(TRIM(nombre), ' ' , TRIM(apellido)) AS cliente, DAY(fecha_nacimiento) AS dia, YEAR(fecha_nacimiento) AS anio_nacimiento
+-- Ejercicio 5 : Campañas por fecha. 
+SELECT CONCAT(UPPER(TRIM(apellido)), ', ', LOWER(TRIM(nombre))) AS cliente, DAY(fecha_nacimiento) AS dia, YEAR(fecha_nacimiento) AS anio_nacimiento
 FROM t_cliente
 WHERE MONTH(fecha_nacimiento) = 11
 ORDER BY DAY(fecha_nacimiento);
@@ -135,14 +135,14 @@ FROM t_producto
 WHERE DATEDIFF('2026-11-13', fecha_hora_ingreso) > 365
 ORDER BY dias_bodega DESC;
 
--- Ejercico 7 : ventas antiguas de alto monto. de la tabla t_venta_antigua, mostrar el numero de boleta convertido en un numero entero sin signo (columna llamda boleta) el producto y el total de la venta calculando como precio por cantidad, ambos convertido a numero entero sin signo (columna llamada total) muestre solo las ventas cuyo total supere los 100.000
+-- Ejercico 7 : ventas antiguas de alto monto. 
 SELECT CAST(nro_boleta AS UNSIGNED) AS boleta, producto, CAST(precio_txt AS UNSIGNED) * CAST(cantidad_txt AS UNSIGNED) AS total
 FROM t_venta_antigua
 WHERE (CAST(precio_txt AS UNSIGNED) * CAST(cantidad_txt AS UNSIGNED)) > 100000
 ORDER BY total DESC;
 
 
--- Ejercicio 8 : ventas de tarde en noviembre. mostrar nro_boleta, el producot, la fecha de la venta (columna llamada "fecha") y hora de su venta (columna llamada "hora"), obtenidas convirtiendo fecha_hora_Txt, de las ventas realizadas en el mes denoviembre, las comparaciones del where deben hacerse sobre los valores convertidos ordene por fecha
+-- Ejercicio 8 : ventas de tarde en noviembre. 
 SELECT nro_boleta, producto, DATE(fecha_hora_txt) AS fecha, TIME(fecha_hora_txt) AS hora
 FROM t_venta_antigua
 WHERE MONTH(STR_TO_DATE(fecha_hora_txt, '%Y-%m-%d %H:%i:%s')) = 11 AND TIME (STR_TO_DATE(fecha_hora_txt, '%Y-%m-%d' '%H:%i:%s')) >= '12:00:00'
